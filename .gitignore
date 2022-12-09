@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+# Distribution / packaging
+build/
+install/
