@@ -19,9 +19,11 @@ namespace trigger_utils
   inline constexpr std::size_t NGEIGER_PER_TP = 36;
   inline constexpr std::size_t EVENT_BUFFER_FRAME_SIZE = 128;
   inline constexpr std::size_t EVENT_BUFFER_WORDS_SIZE = 41;
+  inline constexpr std::size_t EVENT_BUFFER_GEIGER_MATRIX_WORDS_SIZE = 21;
   inline constexpr std::size_t ZONING_WORD_SIZE = 7;
   inline constexpr std::size_t BLANK_WORD_SIZE = 4;
   inline constexpr std::size_t LAST_BLANK_WORD_SIZE = 1;
+  inline constexpr std::size_t SPECIAL_BLANK_WORD_SIZE = 84;
 
 
   inline constexpr std::size_t GEIGER_FIRST_ROW_START_INDEX = 0;
@@ -32,6 +34,10 @@ namespace trigger_utils
   inline constexpr std::size_t GEIGER_THIRD_ROW_STOP_INDEX = 26;
   inline constexpr std::size_t GEIGER_FOURHT_ROW_START_INDEX = 27;
   inline constexpr std::size_t GEIGER_FOURTH_ROW_START_INDEX = 35;
+
+  inline constexpr std::size_t EVENT_BUFFER_SPECIAL_FRAME_INDEX_CB0 = 6;
+  inline constexpr std::size_t EVENT_BUFFER_SPECIAL_FRAME_INDEX_CB1 = 13;
+  inline constexpr std::size_t EVENT_BUFFER_SPECIAL_FRAME_INDEX_CB2 = 20;
 
 
 }

@@ -29,7 +29,7 @@ struct event_buffer {
   };
 
   void display_frame() {
-  std::clog << this->final_event_buffer_bitset << std::endl;
+    std::clog << this->final_event_buffer_bitset << std::endl;
   }
 
 
@@ -54,6 +54,14 @@ struct trigger_frame {
     for (int side = 0; side < trigger_utils::NSIDES; side++) {
         for (int row = 0; row < trigger_utils::NROWS; row++) {
           for (int layer = 0; layer < trigger_utils::NLAYERS; layer++) {
+
+            // Layout Geiger cell for a given FEB n
+            //
+            // [17;16;15;14;13;12;11;10;09] | [27;28;29;30;31;32;33;34;35] row (i+1)
+            // [08;07;06;05;04;03;02;01;00] | [18;19;20;21;22;23;24;25;26] row (i)
+            //
+            // 128 bits in event buffer 3 FEBs in 1 word: [0][7][0000][36][0000][36][00000][36] Feb n+2; n+1; n
+
             if (side == 0) {
               // Side 0
               // For the side 0, layer are not in the right order. 9 from matrix is 0 in the frame, 8-1, 7-2 ...
@@ -63,6 +71,8 @@ struct trigger_frame {
               // Example: where to place row 1 ? row 23 ? special case row 55 ? row 60 ? row 85 ? row 112 ?
               // In TB code in verilog: 3 x 36 bits (i.e 2 FEB) in 1 word of 128
 
+
+              // if (row == 56 && 57) Special treatment because the row 56 is alone in CB1 FEB 9 and then for 57 CB1 FEB 10 (induce a shift in the numerotation)`
 
             } else {
               // Side 1
