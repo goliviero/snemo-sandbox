@@ -2705,10 +2705,6 @@ always @ (posedge clk40_To_FPGA or negedge n_rst_phaser)
 //else	if (notL2_memo & L2_Decision )	begin
 	//jihane 21/11/2022
 	else	if (L2_Decision )
-			dff_Zoning_Word			<= 	{7'b0000000,S1_Zoning_Word_Near_Source[8],S1_Zoning_Word_Near_Source[7:0],7'b0000000,S1_Zoning_Word_Pattern[8],S1_Zoning_Word_Pattern[7:0], // error here should be 10 bits each Zoning_Word
-	 									 7'b0000000,S0_Zoning_Word_Near_Source[8],S0_Zoning_Word_Near_Source[7:0],7'b0000000,S0_Zoning_Word_Pattern[8],S0_Zoning_Word_Pattern[7:0]};
-
-
 			dff_Zoning_Word			<= 	{6'b0000000,S1_Zoning_Word_Near_Source[9:8],S1_Zoning_Word_Near_Source[7:0],6'b0000000,S1_Zoning_Word_Pattern[9:8],S1_Zoning_Word_Pattern[7:0], // error here should be 10 bits each Zoning_Word
 	 									 6'b0000000,S0_Zoning_Word_Near_Source[9:8],S0_Zoning_Word_Near_Source[7:0],6'b0000000,S0_Zoning_Word_Pattern[9:8],S0_Zoning_Word_Pattern[7:0]};
 	end
@@ -2883,18 +2879,19 @@ assign HeaderDatas = 32'hAABBCCDD;
 assign TrailerDatas = 32'hCCDDEEFF;
 
 
-//Header :
+
+// In a word of 128 bits we can put 16 bytes of 8 bits
 
 // Jihane : 21/11/2022
 // Gestion du almost full de la fifo EventBuffer.
 // changer la mémorisation des données
 
 //------
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h00) ? {72'h00,HeaderDatas[31:0], // not needed in my parsing, only needed by Jihane for her SW protocol subaddress_evtbuffer[7:0], Nbwords_MSB[7:0], Nbwords_LSB[7:0]}	:8'hzz;
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h00) ? {72'h00,HeaderDatas[31:0], // not needed in my parsing, only needed by Jihane for her SW protocol subaddress_evtbuffer[7:0], Nbwords_MSB[7:0], Nbwords_LSB[7:0]}	:8'hzz; byte [15;0]
 
 //Stamps
 //------
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h01) ? {29'h00,DAVE_Decision_OK,APE_Decision_OK,CARACO_Decision_OK,PER_trigger_ID_APE[31:0],dff_clock1600periodcounter[31:0],dff_Trigger_ID[31:0]} :8'hzz;
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h01) ? {29'h00,DAVE_Decision_OK,APE_Decision_OK,CARACO_Decision_OK,PER_trigger_ID_APE[31:0],dff_clock1600periodcounter[31:0],dff_Trigger_ID[31:0]} :8'hzz; // byte [31;16]
 
 //Whole matrice pure Tracker
 
@@ -2906,28 +2903,37 @@ assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h01) ? {29'h00,DAVE
 			  TSZB_S1Z2_,TSZB_S1Z3_,TSZB_S1Z4_,TSZB_S1Z5_,TSZB_S1Z6_,TSZB_S1Z7_,
 			  TSZB_S1Z8_,TSZB_S1Z9_; */
 
-//-------------                                                                                                                                                                                                                            Rows number, 2 rows == 1 FEB
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h02) ? {1'b0, TSZB_S0Z0_[6:0],4'b0  ,dff_TPsfromCB0FromStreaming_[107:72], 4'b0,dff_TPsfromCB0FromStreaming_[71:36], 4'b0,dff_TPsfromCB0FromStreaming_[35:0]}:128'hzz;     ///5-4-3-2-1-0]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h03) ? {1'b0, TSZB_S0Z1_[6:0],4'b0  ,dff_TPsfromCB0FromStreaming_[215:180],4'b0,dff_TPsfromCB0FromStreaming_[179:144],4'b0,dff_TPsfromCB0FromStreaming_[143:108]}:128'hzz; //[11-10-9-8-7-6]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h04) ? {1'b0, TSZB_S0Z2_[6:0],4'b0  ,dff_TPsfromCB0FromStreaming_[323:288],4'b0,dff_TPsfromCB0FromStreaming_[287:252],4'b0,dff_TPsfromCB0FromStreaming_[251:216]}:128'hzz; //[17-16-15-14-13-12]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h05) ? {1'b0, TSZB_S0Z3_[6:0],4'b0  ,dff_TPsfromCB0FromStreaming_[431:396],4'b0,dff_TPsfromCB0FromStreaming_[395:360],4'b0,dff_TPsfromCB0FromStreaming_[359:324]}:128'hzz; //[23-22-21-20-19-18]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h06) ? {1'b0, TSZB_S0Z4_[6:0],4'b0  ,dff_TPsfromCB0FromStreaming_[539:504],4'b0,dff_TPsfromCB0FromStreaming_[503:468],4'b0,dff_TPsfromCB0FromStreaming_[467:432]}:128'hzz; //[29-28-27-26-25-24]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h07) ? {1'b0, TSZB_S0Z5_[6:0],4'b0  ,dff_TPsfromCB0FromStreaming_[647:612],4'b0,dff_TPsfromCB0FromStreaming_[611:576],4'b0,dff_TPsfromCB0FromStreaming_[575:540]}:128'hzz; //[35-34-33-32-31-30]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h08) ? {1'b0, TSZB_S0Z6_[6:0],84'h00,dff_TPsfromCB0FromStreaming_[683:648]}:128'hzz;                                                                                       //[37-36]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h09) ? {1'b0, TSZB_S0Z7_[6:0],4'b0  ,dff_TPsfromCB1FromStreaming_[107:72], 4'b0,dff_TPsfromCB1FromStreaming_[71:36], 4'b0,dff_TPsfromCB1FromStreaming_[35:0]}:128'hzz;     //[43-42-41-40-39-38]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h0A) ? {1'b0, TSZB_S0Z8_[6:0],4'b0  ,dff_TPsfromCB1FromStreaming_[215:180],4'b0,dff_TPsfromCB1FromStreaming_[179:144],4'b0,dff_TPsfromCB1FromStreaming_[143:108]}:128'hzz; //[49-48-47-46-45-44]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h0B) ? {1'b0, TSZB_S0Z9_[6:0],4'b0  ,dff_TPsfromCB1FromStreaming_[323:288],4'b0,dff_TPsfromCB1FromStreaming_[287:252],4'b0,dff_TPsfromCB1FromStreaming_[251:216]}:128'hzz; //[55-54-53-52-51-50]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h0C) ? {1'b0, TSZB_S1Z0_[6:0],4'b0  ,dff_TPsfromCB1FromStreaming_[431:396],4'b0,dff_TPsfromCB1FromStreaming_[395:360],4'b0,dff_TPsfromCB1FromStreaming_[359:324]}:128'hzz; //[60-59-58-57-XX-56]! Warning row 56
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h0D) ? {1'b0, TSZB_S1Z1_[6:0],4'b0  ,dff_TPsfromCB1FromStreaming_[539:504],4'b0,dff_TPsfromCB1FromStreaming_[503:468],4'b0,dff_TPsfromCB1FromStreaming_[467:432]}:128'hzz; //[66-65-64-63-62-61]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h0E) ? {1'b0, TSZB_S1Z2_[6:0],4'b0  ,dff_TPsfromCB1FromStreaming_[647:612],4'b0,dff_TPsfromCB1FromStreaming_[611:576],4'b0,dff_TPsfromCB1FromStreaming_[575:540]}:128'hzz; //[72-71-70-69-68-67]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h0F) ? {1'b0, TSZB_S1Z3_[6:0],84'h00,dff_TPsfromCB1FromStreaming_[683:648]}:128'hzz;                                                                                       //[74-73]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h10) ? {1'b0, TSZB_S1Z4_[6:0],4'b0  ,dff_TPsfromCB2FromStreaming_[107:72], 4'b0,dff_TPsfromCB2FromStreaming_[71:36], 4'b0,dff_TPsfromCB2FromStreaming_[35:0]}:128'hzz;     //[80-79-78-77-76-75]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h11) ? {1'b0, TSZB_S1Z5_[6:0],4'b0  ,dff_TPsfromCB2FromStreaming_[215:180],4'b0,dff_TPsfromCB2FromStreaming_[179:144],4'b0,dff_TPsfromCB2FromStreaming_[143:108]}:128'hzz; //[86-85-84-83-82-81]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h12) ? {1'b0, TSZB_S1Z6_[6:0],4'b0  ,dff_TPsfromCB2FromStreaming_[323:288],4'b0,dff_TPsfromCB2FromStreaming_[287:252],4'b0,dff_TPsfromCB2FromStreaming_[251:216]}:128'hzz; //[92-91-90-89-88-87]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h13) ? {1'b0, TSZB_S1Z7_[6:0],4'b0  ,dff_TPsfromCB2FromStreaming_[431:396],4'b0,dff_TPsfromCB2FromStreaming_[395:360],4'b0,dff_TPsfromCB2FromStreaming_[359:324]}:128'hzz; //[98-97-96-95-94-93]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h14) ? {1'b0, TSZB_S1Z8_[6:0],4'b0  ,dff_TPsfromCB2FromStreaming_[539:504],4'b0,dff_TPsfromCB2FromStreaming_[503:468],4'b0,dff_TPsfromCB2FromStreaming_[467:432]}:128'hzz; //[104-103-102-101-100-99]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h15) ? {1'b0, TSZB_S1Z9_[6:0],4'b0  ,dff_TPsfromCB2FromStreaming_[647:612],4'b0,dff_TPsfromCB2FromStreaming_[611:576],4'b0,dff_TPsfromCB2FromStreaming_[575:540]}:128'hzz; //[110-109-108-107-106-105]
-assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h16) ? {88'h00,4'h0,dff_TPsfromCB2FromStreaming_[683:648]}:128'hzz;                                                                                                        //[112-111]
+//-------------                                                                                                                                                                                                                        Rows number, 2 rows == 1 FEB
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h02) ? {1'b0, TSZB_S0Z0_[6:0],4'b0  ,dff_TPsfromCB0FromStreaming_[107:72], 4'b0,dff_TPsfromCB0FromStreaming_[71:36], 4'b0,dff_TPsfromCB0FromStreaming_[35:0]}:128'hzz;     ///5-4-3-2-1-0]       byte [47;32]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h03) ? {1'b0, TSZB_S0Z1_[6:0],4'b0  ,dff_TPsfromCB0FromStreaming_[215:180],4'b0,dff_TPsfromCB0FromStreaming_[179:144],4'b0,dff_TPsfromCB0FromStreaming_[143:108]}:128'hzz; //[11-10-9-8-7-6]     byte [63;48]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h04) ? {1'b0, TSZB_S0Z2_[6:0],4'b0  ,dff_TPsfromCB0FromStreaming_[323:288],4'b0,dff_TPsfromCB0FromStreaming_[287:252],4'b0,dff_TPsfromCB0FromStreaming_[251:216]}:128'hzz; //[17-16-15-14-13-12] byte [79;64]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h05) ? {1'b0, TSZB_S0Z3_[6:0],4'b0  ,dff_TPsfromCB0FromStreaming_[431:396],4'b0,dff_TPsfromCB0FromStreaming_[395:360],4'b0,dff_TPsfromCB0FromStreaming_[359:324]}:128'hzz; //[23-22-21-20-19-18] byte [95;80]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h06) ? {1'b0, TSZB_S0Z4_[6:0],4'b0  ,dff_TPsfromCB0FromStreaming_[539:504],4'b0,dff_TPsfromCB0FromStreaming_[503:468],4'b0,dff_TPsfromCB0FromStreaming_[467:432]}:128'hzz; //[29-28-27-26-25-24] byte [111;96]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h07) ? {1'b0, TSZB_S0Z5_[6:0],4'b0  ,dff_TPsfromCB0FromStreaming_[647:612],4'b0,dff_TPsfromCB0FromStreaming_[611:576],4'b0,dff_TPsfromCB0FromStreaming_[575:540]}:128'hzz; //[35-34-33-32-31-30] byte [127;112]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h08) ? {1'b0, TSZB_S0Z6_[6:0],84'h00,dff_TPsfromCB0FromStreaming_[683:648]}:128'hzz;                                                                                       //[37-36]             byte [143;128]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h09) ? {1'b0, TSZB_S0Z7_[6:0],4'b0  ,dff_TPsfromCB1FromStreaming_[107:72], 4'b0,dff_TPsfromCB1FromStreaming_[71:36], 4'b0,dff_TPsfromCB1FromStreaming_[35:0]}:128'hzz;     //[43-42-41-40-39-38] byte [159;144]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h0A) ? {1'b0, TSZB_S0Z8_[6:0],4'b0  ,dff_TPsfromCB1FromStreaming_[215:180],4'b0,dff_TPsfromCB1FromStreaming_[179:144],4'b0,dff_TPsfromCB1FromStreaming_[143:108]}:128'hzz; //[49-48-47-46-45-44] byte [175;160]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h0B) ? {1'b0, TSZB_S0Z9_[6:0],4'b0  ,dff_TPsfromCB1FromStreaming_[323:288],4'b0,dff_TPsfromCB1FromStreaming_[287:252],4'b0,dff_TPsfromCB1FromStreaming_[251:216]}:128'hzz; //[55-54-53-52-51-50] byte [191;176]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h0C) ? {1'b0, TSZB_S1Z0_[6:0],4'b0  ,dff_TPsfromCB1FromStreaming_[431:396],4'b0,dff_TPsfromCB1FromStreaming_[395:360],4'b0,dff_TPsfromCB1FromStreaming_[359:324]}:128'hzz; //[60-59-58-57-XX-56]! Warning row 56 byte [207;192]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h0D) ? {1'b0, TSZB_S1Z1_[6:0],4'b0  ,dff_TPsfromCB1FromStreaming_[539:504],4'b0,dff_TPsfromCB1FromStreaming_[503:468],4'b0,dff_TPsfromCB1FromStreaming_[467:432]}:128'hzz; //[66-65-64-63-62-61] byte [223;208]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h0E) ? {1'b0, TSZB_S1Z2_[6:0],4'b0  ,dff_TPsfromCB1FromStreaming_[647:612],4'b0,dff_TPsfromCB1FromStreaming_[611:576],4'b0,dff_TPsfromCB1FromStreaming_[575:540]}:128'hzz; //[72-71-70-69-68-67] byte [239;224]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h0F) ? {1'b0, TSZB_S1Z3_[6:0],84'h00,dff_TPsfromCB1FromStreaming_[683:648]}:128'hzz;                                                                                       //[74-73]             byte [255;240]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h10) ? {1'b0, TSZB_S1Z4_[6:0],4'b0  ,dff_TPsfromCB2FromStreaming_[107:72], 4'b0,dff_TPsfromCB2FromStreaming_[71:36], 4'b0,dff_TPsfromCB2FromStreaming_[35:0]}:128'hzz;     //[80-79-78-77-76-75] byte [271;256]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h11) ? {1'b0, TSZB_S1Z5_[6:0],4'b0  ,dff_TPsfromCB2FromStreaming_[215:180],4'b0,dff_TPsfromCB2FromStreaming_[179:144],4'b0,dff_TPsfromCB2FromStreaming_[143:108]}:128'hzz; //[86-85-84-83-82-81] byte [287;272]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h12) ? {1'b0, TSZB_S1Z6_[6:0],4'b0  ,dff_TPsfromCB2FromStreaming_[323:288],4'b0,dff_TPsfromCB2FromStreaming_[287:252],4'b0,dff_TPsfromCB2FromStreaming_[251:216]}:128'hzz; //[92-91-90-89-88-87] byte [303;288]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h13) ? {1'b0, TSZB_S1Z7_[6:0],4'b0  ,dff_TPsfromCB2FromStreaming_[431:396],4'b0,dff_TPsfromCB2FromStreaming_[395:360],4'b0,dff_TPsfromCB2FromStreaming_[359:324]}:128'hzz; //[98-97-96-95-94-93] byte [319;304]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h14) ? {1'b0, TSZB_S1Z8_[6:0],4'b0  ,dff_TPsfromCB2FromStreaming_[539:504],4'b0,dff_TPsfromCB2FromStreaming_[503:468],4'b0,dff_TPsfromCB2FromStreaming_[467:432]}:128'hzz; //[104-103-102-101-100-99]  byte [335;320]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h15) ? {1'b0, TSZB_S1Z9_[6:0],4'b0  ,dff_TPsfromCB2FromStreaming_[647:612],4'b0,dff_TPsfromCB2FromStreaming_[611:576],4'b0,dff_TPsfromCB2FromStreaming_[575:540]}:128'hzz; //[110-109-108-107-106-105] byte [351;336]
+assign in_wren_eventbuffer[127:0] = (counterEventbuffer == 8'h16) ? {88'h00,4'h0,dff_TPsfromCB2FromStreaming_[683:648]}:128'hzz;                                                                                                        //[112-111]                 byte [367;352]
+
+// last word Tracker
+//------------------
+assign in_wren_eventbuffer[127:0] = (DAQ_Debug_Mode == 1'b1 && counterEventbuffer == 8'h37) ?{64'h00,dff_Zoning_Word[63:0]}: 128'hZZ; // byte [399;368]
+
+//---------------------------
+//Calorimeter	& TrailerDatas
+//---------------------------
+assign in_wren_eventbuffer[127:0] = (DAQ_Debug_Mode == 1'b1 && counterEventbuffer == 8'h38) ?{56'h00, TrailerDatas[31:0],dff_calorimeter[39:0]}: 128'hZZ; // byte [383;384]
 
 
 
@@ -2959,15 +2965,6 @@ assign in_wren_eventbuffer[127:0] = (DAQ_Debug_Mode == 1'b1 && counterEventbuffe
 assign in_wren_eventbuffer[127:0] = (DAQ_Debug_Mode == 1'b1 && counterEventbuffer == 8'h36) ? {8'h00,dff_PR_S1Z9,dff_PL_S1Z9,dff_VSZB_HSZB_TSZB_S1Z9}:128'hzz;
 
 // END OF DEBUG
-
-// last word Tracker
-//------------------
-assign in_wren_eventbuffer[127:0] = (DAQ_Debug_Mode == 1'b1 && counterEventbuffer == 8'h37) ?{64'h00,dff_Zoning_Word[63:0]}: 128'hZZ;
-
-//---------------------------
-//Calorimeter	& TrailerDatas
-//---------------------------
-assign in_wren_eventbuffer[127:0] = (DAQ_Debug_Mode == 1'b1 && counterEventbuffer == 8'h38) ?{56'h00, TrailerDatas[31:0],dff_calorimeter[39:0]}: 128'hZZ;
 
 
 // cas non debug // same data but shifted in the table
